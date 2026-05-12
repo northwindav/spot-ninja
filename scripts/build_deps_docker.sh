@@ -12,8 +12,8 @@
 # Location in Docker: /opt/src/windninja/scripts/build_deps_docker.sh
 # ============================================================================
 
-set -e  # Exit on error
-set -x  # Print each command (debugging)
+set -e
+set -x
 
 DEBIAN_FRONTEND=noninteractive
 
@@ -25,11 +25,13 @@ echo "======================================================================"
 # Step 1: Install system-level build dependencies and libraries
 # ============================================================================
 
+echo "Step 1: Installing system packages..."
 apt-get update
 apt-get install -y --no-install-recommends \
     zlib1g-dev libbz2-dev liblzma-dev libcurl4-openssl-dev \
     libhdf5-dev \
     libshp-dev libshp2 \
+    libgeos-dev libgeos++-dev \
     libspatialindex-dev libexpat1-dev libxerces-c-dev \
     libpq-dev \
     libproj-dev proj-data \
@@ -40,7 +42,8 @@ apt-get install -y --no-install-recommends \
 # Step 2: Build and install PROJ 4.9.3
 # ============================================================================
 
-echo "Building PROJ 4.9.3..."
+echo ""
+echo "Step 2: Building PROJ 4.9.3..."
 cd /opt/src
 wget -q https://github.com/OSGeo/PROJ/releases/download/4.9.3/proj-4.9.3.tar.gz
 tar -xzf proj-4.9.3.tar.gz
@@ -56,7 +59,8 @@ rm -rf proj-4.9.3 proj-4.9.3.tar.gz
 # Step 3: Build and install GDAL 2.2.2
 # ============================================================================
 
-echo "Building GDAL 2.2.2..."
+echo ""
+echo "Step 3: Building GDAL 2.2.2..."
 cd /opt/src
 wget -q https://github.com/OSGeo/gdal/releases/download/v2.2.2/gdal-2.2.2.tar.gz
 tar -xzf gdal-2.2.2.tar.gz
@@ -80,7 +84,8 @@ rm -rf gdal-2.2.2 gdal-2.2.2.tar.gz
 # Step 4: Build and install NetCDF 4.1.1
 # ============================================================================
 
-echo "Building NetCDF 4.1.1..."
+echo ""
+echo "Step 4: Building NetCDF 4.1.1..."
 cd /opt/src
 wget -q https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-4.1.1.tar.gz
 tar -xzf netcdf-4.1.1.tar.gz
@@ -97,35 +102,25 @@ cd /opt/src
 rm -rf netcdf-4.1.1 netcdf-4.1.1.tar.gz
 
 # ============================================================================
-# Step 5: Build and install OpenFOAM 8
+# Step 5: Build and install OpenFOAM 8 (required for NINJAFOAM)
 # ============================================================================
 
-echo "Building OpenFOAM 8..."
+echo ""
+echo "Step 5: Building OpenFOAM 8..."
 cd /opt/src
-
-# Download OpenFOAM
 wget -q https://sourceforge.net/projects/openfoam/files/v8/OpenFOAM-8.tar.gz
 tar -xzf OpenFOAM-8.tar.gz
 cd OpenFOAM-8
-
-# Patch bashrc for non-interactive build
 sed -i 's|WM_PROJECT_INST_DIR=$HOME/OpenFOAM|WM_PROJECT_INST_DIR=/opt|g' etc/bashrc
 sed -i 's|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/OpenFOAM-${WM_PROJECT_VERSION}|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/openfoam8|g' etc/bashrc
-
-# Source bashrc and build
 source etc/bashrc
 cd $WM_PROJECT_DIR
-
-# Build OpenFOAM
 ./Allwmake -j 4 2>&1 | tail -100
-
-# Verify build
 if [ -d "$FOAM_LIBBIN" ]; then
     echo "OpenFOAM 8 built successfully"
 else
     echo "Warning: OpenFOAM build verification inconclusive, proceeding anyway"
 fi
-
 cd /opt/src
 rm OpenFOAM-8.tar.gz
 
@@ -137,10 +132,9 @@ echo ""
 echo "======================================================================"
 echo "Verifying dependency installations..."
 echo "======================================================================"
-
 ldconfig -p | grep -E "proj|gdal|netcdf|hdf5" || echo "Note: Some libraries may not be in cache yet"
-
 echo ""
 echo "======================================================================"
 echo "Build dependencies installation complete!"
-echo "======================================================================"
+echo "====================================================================="
+
