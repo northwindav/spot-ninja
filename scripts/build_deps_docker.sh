@@ -26,33 +26,11 @@ apt-get install -y --no-install-recommends \
     curl unzip vim less
 
 # ============================================================================
-# Step 2: Build and install PROJ 4.9.3
+# Step 2: Build and install GDAL 2.2.2 (using system PROJ from apt)
 # ============================================================================
 
 echo ""
-echo "Step 2: Building PROJ 4.9.3..."
-cd /opt/src
-echo "Downloading PROJ 4.9.3..."
-wget https://github.com/OSGeo/PROJ/releases/download/4.9.3/proj-4.9.3.tar.gz || { echo "PROJ download failed"; exit 1; }
-echo "Extracting PROJ..."
-tar -xzf proj-4.9.3.tar.gz || { echo "PROJ extraction failed"; exit 1; }
-cd proj-4.9.3 || { echo "PROJ directory not found"; exit 1; }
-echo "Configuring PROJ..."
-./configure --prefix=/usr/local || { echo "PROJ configure failed"; exit 1; }
-echo "Building PROJ..."
-make -j4 || { echo "PROJ make failed"; exit 1; }
-echo "Installing PROJ..."
-make install || { echo "PROJ make install failed"; exit 1; }
-ldconfig
-cd /opt/src
-rm -rf proj-4.9.3 proj-4.9.3.tar.gz
-
-# ============================================================================
-# Step 3: Build and install GDAL 2.2.2
-# ============================================================================
-
-echo ""
-echo "Step 3: Building GDAL 2.2.2..."
+echo "Step 2: Building GDAL 2.2.2..."
 cd /opt/src
 echo "Downloading GDAL..."
 wget https://github.com/OSGeo/gdal/releases/download/v2.2.2/gdal-2.2.2.tar.gz || { echo "GDAL download failed"; exit 1; }
@@ -62,7 +40,7 @@ cd gdal-2.2.2 || { echo "GDAL directory not found"; exit 1; }
 echo "Configuring GDAL..."
 ./configure \
     --prefix=/usr/local \
-    --with-proj=/usr/local \
+    --with-proj \
     --with-hdf5=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial \
     --with-curl \
     --with-png \
@@ -78,11 +56,11 @@ cd /opt/src
 rm -rf gdal-2.2.2 gdal-2.2.2.tar.gz
 
 # ============================================================================
-# Step 4: Build and install NetCDF 4.1.1
+# Step 3: Build and install NetCDF 4.1.1
 # ============================================================================
 
 echo ""
-echo "Step 4: Building NetCDF 4.1.1..."
+echo "Step 3: Building NetCDF 4.1.1..."
 cd /opt/src
 echo "Downloading NetCDF..."
 wget https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-4.1.1.tar.gz || { echo "NetCDF download failed"; exit 1; }
@@ -104,8 +82,18 @@ cd /opt/src
 rm -rf netcdf-4.1.1 netcdf-4.1.1.tar.gz
 
 # ============================================================================
-# Step 5: Build and install OpenFOAM 8 (required for NINJAFOAM)
+# Step 6: Verify installs
 # ============================================================================
+
+echo ""
+echo "======================================================================"
+echo "Verifying dependency installations..."
+echo "======================================================================"
+ldconfig -p | grep -E "proj|gdal|netcdf|hdf5" || echo "Note: Some libraries may not be in cache yet"
+echo ""
+echo "======================================================================"
+echo "Build dependencies installation complete!"
+echo "======================================================================"
 
 echo ""
 echo "Step 5: Building OpenFOAM 8..."
