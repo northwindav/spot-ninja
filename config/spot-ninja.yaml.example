@@ -1,0 +1,65 @@
+# Spot-Ninja Configuration File
+# Copy this to spot-ninja.yaml and customize per run
+
+# Location
+location:
+  latitude: 51.0
+  longitude: -114.0
+  name: "Alberta Foothills (test)"
+
+# Region of Interest (approximate, in km)
+roi:
+  size_km: 10
+  # Note: Actual ROI may be expanded slightly to align with DEM tile boundaries
+
+# DEM Configuration
+dem:
+  # Source priority: 1m (best) -> 2m -> 30m
+  source: "canelevation"  # or "opentopography"
+  resolution: "1m"        # "1m", "2m", or "30m"
+  
+  # If using CanElevation (AWS S3, no auth):
+  # Collections: hrdem-mosaic-1m, hrdem-mosaic-2m, mrdem-30, hrdem-lidar, hrdem-arcticdem
+  collection: "hrdem-mosaic-1m"
+
+# Weather Model Configuration
+weather:
+  # Cascade: HRDPS 1.0km -> HRDPS 2.5km -> GDPS
+  primary_model: "HRDPS"
+  primary_resolution: "1.0km"
+  
+  fallback_models:
+    - model: "HRDPS"
+      resolution: "2.5km"
+    - model: "GDPS"
+      resolution: "10km"
+  
+  # Forecast hours to retrieve
+  forecast_hours:
+    start: 12
+    end: 36
+
+# WindNinja Configuration
+windninja:
+  # Stability option
+  stability: true
+  
+  # Momentum solver (NinjaFOAM)
+  use_foam: true
+  
+  # Output format(s)
+  output_formats:
+    - "kmz"
+    # GeoTIFF support planned for Phase 2+
+    # - "geotiff"
+  
+  # Optional: number of solver iterations
+  # foam_iterations: 1000
+  
+  # Optional: mesh count
+  # foam_mesh_count: 4000000
+
+# Logging
+logging:
+  level: "INFO"
+  file: "spot-ninja.log"
