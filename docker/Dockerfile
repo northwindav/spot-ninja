@@ -57,12 +57,20 @@ RUN apt-get update && \
 # Clone WindNinja v3.12.2 from official repository
 RUN git clone --branch v3.12.2 https://github.com/firelab/windninja.git /opt/src/windninja
 
-# Copy spot-ninja build script (dependency installer)
-COPY scripts/build_deps_docker.sh /opt/src/windninja/scripts/build_deps_docker.sh
-
-# Make build script executable and run it
-RUN chmod +x /opt/src/windninja/scripts/build_deps_docker.sh && \
-    /opt/src/windninja/scripts/build_deps_docker.sh
+# Install all remaining build dependencies (inline from build_deps_docker.sh)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gfortran autoconf libtool \
+    libhdf5-dev \
+    libnetcdf-dev \
+    libgdal-dev \
+    libproj-dev proj-data \
+    libgeos-dev libgeos++-dev \
+    libshp-dev \
+    libpq-dev \
+    libexpat1-dev libxerces-c-dev libspatialindex-dev \
+    openfoam && \
+    rm -rf /var/lib/apt/lists/*
 
 # ============================================================================
 # STAGE 2: WindNinja Compilation
