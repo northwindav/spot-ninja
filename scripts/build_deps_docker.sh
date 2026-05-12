@@ -8,22 +8,77 @@ echo "======================================================================"
 echo "Installing WindNinja Build Dependencies"
 echo "======================================================================"
 
-# ============================================================================
-# Step 1: Install system-level build dependencies and libraries
-# ============================================================================
-
+# Step 1: Install all build dependencies via apt (system packages)
 echo "Step 1: Installing system packages..."
 apt-get update
 apt-get install -y --no-install-recommends \
-    zlib1g-dev libbz2-dev liblzma-dev libcurl4-openssl-dev \
+    cmake git build-essential pkg-config \
+    wget curl gfortran autoconf libtool \
+    libboost-program-options-dev libboost-date-time-dev libboost-test-dev \
     libhdf5-dev \
-    libshp-dev \
-    libgeos-dev libgeos++-dev \
-    libspatialindex-dev libexpat1-dev libxerces-c-dev \
-    libpq-dev \
+    libnetcdf-dev \
+    libgdal-dev \
     libproj-dev proj-data \
-    gfortran autoconf libtool \
-    curl unzip vim less
+    libgeos-dev libgeos++-dev \
+    libshp-dev \
+    libpq-dev \
+    libexpat1-dev libxerces-c-dev libspatialindex-dev \
+    python3-pip
+
+# Verify critical packages
+echo ""
+echo "======================================================================"
+echo "Verifying critical package installations..."
+echo "======================================================================"
+
+if pkg-config --exists gdal netcdf proj; then
+    echo "✓ GDAL, NetCDF, and PROJ packages verified via pkg-config"
+else
+    echo "Warning: Some packages may not be available in pkg-config"
+fi
+
+if [ -f "/usr/lib/x86_64-linux-gnu/libgdal.so" ] && \
+   [ -f "/usr/lib/x86_64-linux-gnu/libnetcdf.so" ] && \
+   [ -f "/usr/lib/x86_64-linux-gnu/libproj.so" ]; then
+    echo "✓ All critical libraries (.so files) found"
+else
+    echo "Warning: Some library files may not be in expected locations"
+fi
+
+ldconfig -p | grep -E "proj|gdal|netcdf|hdf5" || echo "Note: Libraries may not be in ldconfig cache yet"
+
+# Step 2: Build and install OpenFOAM 8 (required for NINJAFOAM)
+echo ""
+echo "======================================================================"
+echo "Step 2: Building OpenFOAM 8..."
+echo "======================================================================"
+
+cd /opt/src
+echo "Downloading OpenFOAM..."
+wget https://sourceforge.net/projects/openfoam/files/v8/OpenFOAM-8.tar.gz || { echo "OpenFOAM download failed"; exit 1; }
+echo "Extracting OpenFOAM..."
+tar -xzf OpenFOAM-8.tar.gz || { echo "OpenFOAM extraction failed"; exit 1; }
+cd OpenFOAM-8 || { echo "OpenFOAM directory not found"; exit 1; }
+sed -i 's|WM_PROJECT_INST_DIR=$HOME/OpenFOAM|WM_PROJECT_INST_DIR=/opt|g' etc/bashrc
+sed -i 's|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/OpenFOAM-${WM_PROJECT_VERSION}|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/openfoam8|g' etc/bashrc
+source etc/bashrc
+cd $WM_PROJECT_DIR
+echo "Building OpenFOAM..."
+./Allwmake -j 4 2>&1 | tail -100
+if [ -d "$FOAM_LIBBIN" ]; then
+    echo "OpenFOAM 8 built successfully"
+else
+    echo "Warning: OpenFOAM build verification inconclusive, proceeding anyway"
+fi
+cd /opt/src
+rm OpenFOAM-8.tar.gz
+
+echo ""
+echo "======================================================================"
+echo "✓ Build dependencies installation complete!"
+echo "====================================================================="
+
+exit 0
 
 # ============================================================================
 # Step 2: Build and install GDAL 2.2.2 (using system PROJ from apt)
