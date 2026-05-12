@@ -25,7 +25,7 @@
 #   Output: KMZ results in /data/output
 # ============================================================================
 
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 USER root
 SHELL [ "/usr/bin/bash", "-c" ]
@@ -54,8 +54,8 @@ RUN apt-get update && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone WindNinja v3.12.2 from official repository
-RUN git clone --branch v3.12.2 https://github.com/firelab/windninja.git /opt/src/windninja
+# Clone WindNinja v3.9.0 from official repository (latest stable available)
+RUN git clone --branch 3.9.0 https://github.com/firelab/windninja.git /opt/src/windninja
 
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
 RUN apt-get update && \
