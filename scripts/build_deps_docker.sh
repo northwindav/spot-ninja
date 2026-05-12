@@ -1,17 +1,4 @@
 #!/bin/bash
-# ============================================================================
-# build_deps_docker.sh - Build dependencies for WindNinja in Docker
-# ============================================================================
-# This script installs all required dependencies for WindNinja compilation:
-#   - NetCDF 4.1.1 (data format)
-#   - GDAL 2.2.2 with full support (geospatial raster/vector I/O)
-#   - PROJ 4.9.3 (coordinate transformations)
-#   - OpenFOAM 8 (momentum solver for NINJAFOAM)
-#
-# Called by Dockerfile during image build
-# Location in Docker: /opt/src/windninja/scripts/build_deps_docker.sh
-# ============================================================================
-
 set -e
 set -x
 
@@ -30,7 +17,7 @@ apt-get update
 apt-get install -y --no-install-recommends \
     zlib1g-dev libbz2-dev liblzma-dev libcurl4-openssl-dev \
     libhdf5-dev \
-    libshp-dev libshp2 \
+    libshp-dev \
     libgeos-dev libgeos++-dev \
     libspatialindex-dev libexpat1-dev libxerces-c-dev \
     libpq-dev \
