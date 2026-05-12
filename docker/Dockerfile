@@ -86,6 +86,8 @@ RUN mkdir -p /opt/src/windninja/build && \
     -D BUILD_SLOPE_ASPECT_GRID=ON \
     -D BUILD_FLOW_SEPARATION_GRID=ON \
     -D NINJA_GUI=OFF \
+    -D CMAKE_DISABLE_FIND_PACKAGE_Qt4=TRUE \
+    -D CMAKE_DISABLE_FIND_PACKAGE_Qt5Core=TRUE \
     .. && \
     # Parallel build (adjust -j12 based on host CPU cores)
     make -j12 && \
