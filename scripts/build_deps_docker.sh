@@ -23,6 +23,7 @@ apt-get install -y --no-install-recommends \
     libshp-dev \
     libpq-dev \
     libexpat1-dev libxerces-c-dev libspatialindex-dev \
+    openfoam \
     python3-pip
 
 # Verify critical packages
@@ -45,70 +46,26 @@ else
     echo "Warning: Some library files may not be in expected locations"
 fi
 
-ldconfig -p | grep -E "proj|gdal|netcdf|hdf5" || echo "Note: Libraries may not be in ldconfig cache yet"
+ldconfig -p | grep -E "proj|gdal|netcdf|hdf5|foam" || echo "Note: Libraries may not be in ldconfig cache yet"
 
-# Step 2: Build and install OpenFOAM 8 (required for NINJAFOAM)
+# Step 2: Verify OpenFOAM installation
 echo ""
 echo "======================================================================"
-echo "Step 2: Building OpenFOAM 8..."
+echo "Step 2: Verifying OpenFOAM installation..."
 echo "======================================================================"
 
-cd /opt/src
-echo "Downloading OpenFOAM..."
-wget https://sourceforge.net/projects/openfoam/files/v8/OpenFOAM-8.tar.gz || { echo "OpenFOAM download failed"; exit 1; }
-echo "Extracting OpenFOAM..."
-tar -xzf OpenFOAM-8.tar.gz || { echo "OpenFOAM extraction failed"; exit 1; }
-cd OpenFOAM-8 || { echo "OpenFOAM directory not found"; exit 1; }
-sed -i 's|WM_PROJECT_INST_DIR=$HOME/OpenFOAM|WM_PROJECT_INST_DIR=/opt|g' etc/bashrc
-sed -i 's|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/OpenFOAM-${WM_PROJECT_VERSION}|WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/openfoam8|g' etc/bashrc
-source etc/bashrc
-cd $WM_PROJECT_DIR
-echo "Building OpenFOAM..."
-./Allwmake -j 4 2>&1 | tail -100
-if [ -d "$FOAM_LIBBIN" ]; then
-    echo "OpenFOAM 8 built successfully"
+if pkg-config --exists openfoam 2>/dev/null || [ -d "/usr/lib/openfoam" ] || command -v foamExec &> /dev/null; then
+    echo "✓ OpenFOAM verified"
 else
-    echo "Warning: OpenFOAM build verification inconclusive, proceeding anyway"
+    echo "Warning: OpenFOAM verification inconclusive, proceeding anyway"
 fi
-cd /opt/src
-rm OpenFOAM-8.tar.gz
 
 echo ""
 echo "======================================================================"
-echo "✓ Build dependencies installation complete!"
+echo "✓ All build dependencies installation complete!"
 echo "====================================================================="
 
 exit 0
-
-# ============================================================================
-# Step 2: Build and install GDAL 2.2.2 (using system PROJ from apt)
-# ============================================================================
-
-echo ""
-echo "Step 2: Building GDAL 2.2.2..."
-cd /opt/src
-echo "Downloading GDAL..."
-wget https://github.com/OSGeo/gdal/releases/download/v2.2.2/gdal-2.2.2.tar.gz || { echo "GDAL download failed"; exit 1; }
-echo "Extracting GDAL..."
-tar -xzf gdal-2.2.2.tar.gz || { echo "GDAL extraction failed"; exit 1; }
-cd gdal-2.2.2 || { echo "GDAL directory not found"; exit 1; }
-echo "Configuring GDAL..."
-./configure \
-    --prefix=/usr/local \
-    --with-proj \
-    --with-hdf5=/usr/include/hdf5/serial,/usr/lib/x86_64-linux-gnu/hdf5/serial \
-    --with-curl \
-    --with-png \
-    --with-jpeg \
-    --with-geos \
-    --with-libshp || { echo "GDAL configure failed"; exit 1; }
-echo "Building GDAL..."
-make -j4 || { echo "GDAL make failed"; exit 1; }
-echo "Installing GDAL..."
-make install || { echo "GDAL make install failed"; exit 1; }
-ldconfig
-cd /opt/src
-rm -rf gdal-2.2.2 gdal-2.2.2.tar.gz
 
 # ============================================================================
 # Step 3: Build and install NetCDF 4.1.1
