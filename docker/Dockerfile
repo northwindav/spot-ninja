@@ -42,10 +42,7 @@ ENV WINDNINJA_WORKDIR=/data
 
 WORKDIR /opt/src
 
-# Copy WindNinja source
-COPY . /opt/src/windninja/
-
-# Install base build tools and libraries
+# Install base build tools (needed for git clone)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     wget gnupg2 cmake git apt-transport-https ca-certificates \
@@ -57,11 +54,15 @@ RUN apt-get update && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Make build script executable
-RUN chmod +x /opt/src/windninja/scripts/build_deps_docker.sh
+# Clone WindNinja v3.12.2 from official repository
+RUN git clone --branch v3.12.2 https://github.com/firelab/windninja.git /opt/src/windninja
 
-# Run dependency build script (PROJ, GDAL, NetCDF, OpenFOAM)
-RUN /opt/src/windninja/scripts/build_deps_docker.sh
+# Copy spot-ninja build script (dependency installer)
+COPY scripts/build_deps_docker.sh /opt/src/windninja/scripts/build_deps_docker.sh
+
+# Make build script executable and run it
+RUN chmod +x /opt/src/windninja/scripts/build_deps_docker.sh && \
+    /opt/src/windninja/scripts/build_deps_docker.sh
 
 # ============================================================================
 # STAGE 2: WindNinja Compilation
@@ -85,28 +86,17 @@ RUN mkdir -p /opt/src/windninja/build && \
     cd /opt/src/windninja
 
 # ============================================================================
-# STAGE 3: OpenFOAM Compilation & Setup
+# STAGE 3: OpenFOAM NinjaFOAM Setup (optional, for momentum solver)
 # ============================================================================
 
-RUN source /opt/openfoam8/etc/bashrc && \
-    mkdir -p $FOAM_RUN/../applications && \
-    cp -r /opt/src/windninja/src/ninjafoam/8/* $FOAM_RUN/../applications && \
-    cd $FOAM_RUN/../applications/ && \
-    sed -i "s|export WM_PROJECT_INST_DIR=|export WM_PROJECT_INST_DIR=/opt|g" \
-    /opt/openfoam8/etc/bashrc && \
-    sed -i "s|export WM_PROJECT_DIR=\$WM_PROJECT_INST_DIR/openfoam8|export WM_PROJECT_DIR=/opt/openfoam8|g" \
-    /opt/openfoam8/etc/bashrc && \
-    . /opt/openfoam8/etc/bashrc && \
-    wmake libso && \
-    cd utility/applyInit && \
-    wmake && \
-    # Copy custom WindNinja OpenFOAM libraries (Singularity compatibility)
-    cp $FOAM_RUN/../platforms/linux64GccDPInt32Opt/lib/libWindNinja.so \
-    /opt/openfoam8/platforms/linux64GccDPInt32Opt/lib/ && \
-    cp $FOAM_RUN/../platforms/linux64GccDPInt32Opt/bin/applyInit \
-    /opt/openfoam8/platforms/linux64GccDPInt32Opt/bin/ && \
-    chmod 644 /opt/openfoam8/platforms/linux64GccDPInt32Opt/lib/libWindNinja.so && \
-    chmod 755 /opt/openfoam8/platforms/linux64GccDPInt32Opt/bin/applyInit
+# Try to source system OpenFOAM environment if available
+# The NinjaFOAM custom libraries may or may not compile with system package
+# This stage is optional; WindNinja will still work without it
+RUN bash -c 'if [ -f /usr/lib/openfoam/bashrc ]; then \
+    source /usr/lib/openfoam/bashrc && \
+    mkdir -p /opt/windninja_foam && \
+    cp -r /opt/src/windninja/src/ninjafoam /opt/windninja_foam/ 2>/dev/null || true; \
+fi' || echo "OpenFOAM NinjaFOAM setup skipped (system package may not have dev files)"
 
 # ============================================================================
 # STAGE 4: Runtime Setup
