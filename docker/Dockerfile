@@ -57,9 +57,6 @@ RUN apt-get update && \
 # Clone WindNinja v3.9.0 from official repository (latest stable available)
 RUN git clone --branch 3.9.0 https://github.com/firelab/windninja.git /opt/src/windninja
 
-# Patch CMakeLists.txt to make Qt4 optional (WindNinja has Qt4 as REQUIRED even with NINJA_GUI=OFF)
-RUN sed -i 's/find_package(Qt4 REQUIRED)/find_package(Qt4)/g' /opt/src/windninja/CMakeLists.txt
-
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -72,6 +69,7 @@ RUN apt-get update && \
     libshp-dev \
     libpq-dev \
     libexpat1-dev libxerces-c-dev libspatialindex-dev \
+    qt5-qmake qtbase5-dev \
     openfoam && \
     rm -rf /var/lib/apt/lists/*
 
