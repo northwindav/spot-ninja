@@ -48,7 +48,7 @@ cp config/spot-ninja.yaml.example config/spot-ninja.yaml
 # Edit config/spot-ninja.yaml for your test case
 ```
 
-### 3. Python Virtual Environment (Phase 2+)
+### 3. Python Virtual Environment & Requirements
 ```bash
 # Create venv
 python -m venv venv
@@ -57,9 +57,11 @@ python -m venv venv
 venv\Scripts\activate  # Windows
 source venv/bin/activate  # Linux/Mac
 
-# Install dependencies (TBD - Phase 2)
-# pip install -r requirements.txt
+# Install Phase 3 dependencies
+pip install -r scripts/requirements.txt
 ```
+
+Includes: boto3, requests, rasterio, xarray, PyYAML, gdal, etc.
 
 ### 4. Docker Setup (Phase 2+) - GitHub Actions
 See [GITHUB_ACTIONS.md](./GITHUB_ACTIONS.md) for detailed instructions.
@@ -84,9 +86,15 @@ docker run --rm windninja:latest windninja --help
 ```bash
 # Activate venv
 venv\Scripts\activate
-
-# Single run
 python scripts/spot_ninja.py --lat 51.0 --lon -114.0 --config config/spot-ninja.yaml
+
+# With debugging
+python scripts/spot_ninja.py --lat 51.0 --lon -114.0 --log-level DEBUG
+
+# Skip components (for testing)
+python scripts/spot_ninja.py --lat 51.0 --lon -114.0 --skip-weather
+
+# Output will be in data/at 51.0 --lon -114.0 --config config/spot-ninja.yaml
 
 # Output will be in data/output/
 ```
@@ -107,10 +115,16 @@ python scripts/spot_ninja.py --lat 51.0 --lon -114.0 --config config/spot-ninja.
 
 **Note**: Using GitHub Actions cloud build instead of local Docker due to virtualization constraints. See [GITHUB_ACTIONS.md](./GITHUB_ACTIONS.md)
 
-### Phase 3: Data Retrieval Integration
-- [ ] DEM retriever (CanElevation AWS S3)
-- [ ] Weather retriever (MSC GeoMet)
-- [ ] Data validation & preprocessing
+### Phase 3: Data Retrieval Integration ✅ (COMPLETE)
+- [x] DEM retriever (CanElevation AWS S3, cascade fallback)
+- [x] Weather retriever (MSC GeoMet HRDPS/GDPS)
+- [x] Input validators (lat/lon, model options, ROI size)
+- [x] Configuration management + logging
+- [x] Main orchestration script (`spot_ninja.py`)
+- [x] Testing framework for each module
+- [x] Complete documentation
+
+**See**: [PHASE3.md](./PHASE3.md) for detailed guide
 
 ### Phase 4: Host Orchestration
 - [ ] Python CLI (`spot_ninja.py`)

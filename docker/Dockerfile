@@ -43,22 +43,22 @@ ENV WINDNINJA_WORKDIR=/data
 WORKDIR /opt/src
 
 # Copy WindNinja source
-ADD . /opt/src/windninja/
+COPY . /opt/src/windninja/
 
 # Install base build tools and libraries
-RUN dpkg-reconfigure debconf --frontend=noninteractive && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     wget gnupg2 cmake git apt-transport-https ca-certificates \
     software-properties-common sudo build-essential \
-    pkg-config g++ \
+    pkg-config g++ bash \
     libboost-program-options-dev \
     libboost-date-time-dev \
     libboost-test-dev \
     python3-pip && \
     cd /opt/src && \
-    # Build all dependencies (NetCDF, GDAL, OpenFOAM, etc.)
-    DEBIAN_FRONTEND=noninteractive /opt/src/windninja/scripts/build_deps_docker.sh && \
+    # Make build script executable and run it
+    chmod +x /opt/src/windninja/scripts/build_deps_docker.sh && \
+    bash -c 'DEBIAN_FRONTEND=noninteractive /opt/src/windninja/scripts/build_deps_docker.sh' && \
     # Clean package manager cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
