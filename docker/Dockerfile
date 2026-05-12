@@ -57,6 +57,9 @@ RUN apt-get update && \
 # Clone WindNinja v3.9.0 from official repository (latest stable available)
 RUN git clone --branch 3.9.0 https://github.com/firelab/windninja.git /opt/src/windninja
 
+# Patch CMakeLists.txt to make Qt4 optional (WindNinja has Qt4 as REQUIRED even with NINJA_GUI=OFF)
+RUN sed -i 's/find_package(Qt4 REQUIRED)/find_package(Qt4)/g' /opt/src/windninja/CMakeLists.txt
+
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -86,8 +89,6 @@ RUN mkdir -p /opt/src/windninja/build && \
     -D BUILD_SLOPE_ASPECT_GRID=ON \
     -D BUILD_FLOW_SEPARATION_GRID=ON \
     -D NINJA_GUI=OFF \
-    -D CMAKE_DISABLE_FIND_PACKAGE_Qt4=TRUE \
-    -D CMAKE_DISABLE_FIND_PACKAGE_Qt5Core=TRUE \
     .. && \
     # Parallel build (adjust -j12 based on host CPU cores)
     make -j12 && \
