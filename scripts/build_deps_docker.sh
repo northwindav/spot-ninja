@@ -27,21 +27,13 @@ echo "======================================================================"
 
 apt-get update
 apt-get install -y --no-install-recommends \
-    # Compression libraries (for NetCDF, HDF5, etc.)
     zlib1g-dev libbz2-dev liblzma-dev libcurl4-openssl-dev \
-    # HDF5 (required by NetCDF)
     libhdf5-dev \
-    # GDAL dependencies: shapefile support (FIX for "No package shapelib found")
     libshp-dev libshp2 \
-    # GDAL dependencies: other formats and tools
     libspatialindex-dev libexpat1-dev libxerces-c-dev \
-    # GDAL dependencies: database drivers
     libpq-dev \
-    # Proj/GDAL coordinate system utilities
     libproj-dev proj-data \
-    # Build and compiler tools (additional)
     gfortran autoconf libtool \
-    # Utilities
     curl unzip vim less
 
 # ============================================================================
