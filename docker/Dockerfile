@@ -56,8 +56,7 @@ RUN apt-get update && \
 
 # Clone WindNinja v3.9.0 from official repository (latest stable available)
 RUN git clone --branch 3.9.0 https://github.com/firelab/windninja.git /opt/src/windninja && \
-    sed -i '/find_package(Qt4 REQUIRED)/i if(NINJA_GUI)' /opt/src/windninja/CMakeLists.txt && \
-    sed -i '/find_package(Qt4 REQUIRED)/a endif()' /opt/src/windninja/CMakeLists.txt
+    sed -i 's/find_package(Qt4 REQUIRED)/# find_package(Qt4 REQUIRED) # Disabled for CLI-only build/g' /opt/src/windninja/CMakeLists.txt
 
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
 RUN apt-get update && \
