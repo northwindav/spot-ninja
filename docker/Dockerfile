@@ -80,6 +80,7 @@ RUN mkdir -p /opt/src/windninja/build && \
     cd /opt/src/windninja/build && \
     # CMake configuration with Spot-Ninja flags
     cmake \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D NINJA_CLI=ON \
     -D NINJA_QTGUI=OFF \
     -D SUPRESS_WARNINGS=ON \
@@ -92,7 +93,9 @@ RUN mkdir -p /opt/src/windninja/build && \
     make -j12 && \
     make install && \
     ldconfig && \
-    cd /opt/src/windninja
+    # Verify installation and ensure windninja is in PATH
+    which windninja || find /usr -name "windninja" -type f 2>/dev/null | head -5 && \
+    echo "Build complete"
 
 # ============================================================================
 # STAGE 3: OpenFOAM NinjaFOAM Setup (optional, for momentum solver)
@@ -118,6 +121,7 @@ WORKDIR /data
 RUN mkdir -p /data
 
 # Expose environment variables for runtime configuration
+ENV PATH="/usr/local/bin:${PATH}"
 ENV CPL_DEBUG=""
 ENV NINJA_FILL_DEM_NO_DATA=OFF
 
