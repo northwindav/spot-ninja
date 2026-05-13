@@ -54,9 +54,8 @@ RUN apt-get update && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone WindNinja v3.9.0 from official repository (latest stable available)
-RUN git clone --branch 3.9.0 https://github.com/firelab/windninja.git /opt/src/windninja && \
-    sed -i 's/find_package(Qt4 REQUIRED)/# find_package(Qt4 REQUIRED) # Disabled for CLI-only build/g' /opt/src/windninja/CMakeLists.txt
+# Clone WindNinja v3.12.2 from official repository (latest stable - fixed Qt optional requirement)
+RUN git clone --branch 3.12.2 https://github.com/firelab/windninja.git /opt/src/windninja
 
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
 RUN apt-get update && \
