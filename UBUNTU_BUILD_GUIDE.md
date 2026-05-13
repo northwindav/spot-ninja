@@ -157,9 +157,9 @@ Successfully tagged windninja:latest
 ```
 
 **Build verification output** (near the end):
-The build script will attempt to show where windninja is installed:
+The build script will attempt to show where WindNinja_cli is installed:
 ```
-/usr/local/bin/windninja
+/usr/local/bin/WindNinja_cli
 Build complete
 ```
 
@@ -239,7 +239,7 @@ gzip windninja-image.tar  # Creates windninja-image.tar.gz (~800 MB - 1.5 GB)
 | `docker: command not found` | Docker not installed | Re-run Step 1 |
 | `permission denied while trying to connect to Docker daemon` | User not in docker group | Add user to docker group (Step 2) or use `sudo docker` |
 | `fatal: remote branch 3.12.2 not found` | Git clone failed | Check internet connection; verify tag exists with `git ls-remote --tags https://github.com/firelab/windninja.git` |
-| `windninja: executable not found in PATH` | Build installation issue | Check build output for "Build complete" verification; ensure CMAKE_INSTALL_PREFIX succeeded |
+| `windninja: executable not found in PATH` | Build installation issue | Verify build output shows "Build complete" and `which WindNinja_cli` succeeds |
 | `CMake error: Qt4 REQUIRED but not found` | Old WindNinja version or wrong flag | Ensure using v3.12.2 and `NINJA_QTGUI=OFF` (not `NINJA_GUI`) |
 | `out of disk space` | Image and cache too large | Run `docker system prune -a --volumes` to free space |
 | `Cannot find GDAL/NetCDF/PROJ` | Missing apt packages | Check Step 1 completed; verify `apt-get update` ran |
@@ -352,11 +352,10 @@ WORKDIR /data
 
 ## Success Criteria
 
-After Step 7, you should see:
+After Step 6, you should see:
 - ✅ Docker image listed: `windninja:latest`
-- ✅ Smoke test passes: `windninja --help` shows output
-- ✅ Container runs: `docker run` completes without "command not found"
-- ✅ TAR file created (if transferring back)
+- ✅ Smoke test passes: `docker run --rm windninja:latest WindNinja_cli --help` shows output
+- ✅ Container initializes: `ENTRYPOINT ["WindNinja_cli"]` starts without "executable not found" error
 
 Once all three are confirmed, the image is ready for Phase 4 (integration testing with Python scripts on Windows).
 

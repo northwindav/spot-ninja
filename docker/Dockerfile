@@ -93,8 +93,8 @@ RUN mkdir -p /opt/src/windninja/build && \
     make -j12 && \
     make install && \
     ldconfig && \
-    # Verify installation and ensure windninja is in PATH
-    which windninja || find /usr -name "windninja" -type f 2>/dev/null | head -5 && \
+    # Verify installation and ensure WindNinja_cli is in PATH
+    which WindNinja_cli || find /usr -name "WindNinja_cli" -type f 2>/dev/null | head -5 && \
     echo "Build complete"
 
 # ============================================================================
@@ -125,9 +125,9 @@ ENV PATH="/usr/local/bin:${PATH}"
 ENV CPL_DEBUG=""
 ENV NINJA_FILL_DEM_NO_DATA=OFF
 
-# Default entrypoint: windninja binary
-# Usage: docker run windninja:latest windninja [options] <config_file>
-ENTRYPOINT ["windninja"]
+# Default entrypoint: WindNinja_cli binary (case-sensitive)
+# Usage: docker run windninja:latest WindNinja_cli [options] <config_file>
+ENTRYPOINT ["WindNinja_cli"]
 CMD ["--help"]
 
 # ============================================================================
@@ -145,7 +145,7 @@ CMD ["--help"]
 #
 # Examples:
 #   # Basic run with input files in /data
-#   docker run -v $(pwd)/data:/data windninja:latest windninja /data/config.sta
+#   docker run -v $(pwd)/data:/data windninja:latest WindNinja_cli /data/config.sta
 #
 #   # Run with stability debugging
 #   docker run -e CPL_DEBUG=STABILITY -v $(pwd)/data:/data windninja:latest windninja /data/config.sta
