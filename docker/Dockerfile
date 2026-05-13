@@ -54,7 +54,7 @@ RUN apt-get update && \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone WindNinja v3.12.2 from official repository (latest stable - fixed Qt optional requirement)
+# Clone WindNinja v3.12.2 from official repository (latest stable)
 RUN git clone --branch 3.12.2 https://github.com/firelab/windninja.git /opt/src/windninja
 
 # Install all remaining build dependencies (inline from build_deps_docker.sh)
@@ -80,12 +80,13 @@ RUN mkdir -p /opt/src/windninja/build && \
     cd /opt/src/windninja/build && \
     # CMake configuration with Spot-Ninja flags
     cmake \
+    -D NINJA_CLI=ON \
+    -D NINJA_QTGUI=OFF \
     -D SUPRESS_WARNINGS=ON \
     -D NINJAFOAM=ON \
     -D BUILD_FETCH_DEM=ON \
     -D BUILD_SLOPE_ASPECT_GRID=ON \
     -D BUILD_FLOW_SEPARATION_GRID=ON \
-    -D NINJA_GUI=OFF \
     .. && \
     # Parallel build (adjust -j12 based on host CPU cores)
     make -j12 && \
