@@ -126,7 +126,10 @@ ENV CPL_DEBUG=""
 ENV NINJA_FILL_DEM_NO_DATA=OFF
 
 # Default entrypoint: WindNinja_cli binary (case-sensitive)
-# Usage: docker run windninja:latest WindNinja_cli [options] <config_file>
+# IMPORTANT: Do NOT pass 'WindNinja_cli' on command line - it will be treated as a config file!
+# Correct usage:
+#   docker run windninja:latest              # Shows help (uses CMD --help)
+#   docker run windninja:latest /data/config.sta  # Runs with config file
 ENTRYPOINT ["WindNinja_cli"]
 CMD ["--help"]
 
@@ -144,8 +147,11 @@ CMD ["--help"]
 #   -v ./data:/data          - Data exchange directory
 #
 # Examples:
-#   # Basic run with input files in /data
-#   docker run -v $(pwd)/data:/data windninja:latest WindNinja_cli /data/config.sta
+#   # Show help (test that image works)
+#   docker run --rm windninja:latest
+#
+#   # Run with config file in mounted data directory
+#   docker run -v $(pwd)/data:/data windninja:latest /data/config.sta
 #
 #   # Run with stability debugging
 #   docker run -e CPL_DEBUG=STABILITY -v $(pwd)/data:/data windninja:latest windninja /data/config.sta

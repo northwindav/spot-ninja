@@ -173,8 +173,9 @@ docker images | grep windninja
 # Should show: windninja    latest    <hash>    <time>    ~4 GB
 
 # Test the image (smoke test)
-docker run --rm windninja:latest windninja --help
-# Should output WindNinja version and command-line options
+# Note: Do NOT pass 'WindNinja_cli' on command line - it will be treated as a config file!
+docker run --rm windninja:latest
+# Should output WindNinja help text (default CMD is --help)
 ```
 
 If you see an error like `executable not found in PATH`, this indicates an installation issue. The build verification output should have shown the binary location.
@@ -354,7 +355,7 @@ WORKDIR /data
 
 After Step 6, you should see:
 - ✅ Docker image listed: `windninja:latest`
-- ✅ Smoke test passes: `docker run --rm windninja:latest WindNinja_cli --help` shows output
+- ✅ Smoke test passes: `docker run --rm windninja:latest` shows help text
 - ✅ Container initializes: `ENTRYPOINT ["WindNinja_cli"]` starts without "executable not found" error
 
 Once all three are confirmed, the image is ready for Phase 4 (integration testing with Python scripts on Windows).
