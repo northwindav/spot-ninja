@@ -119,8 +119,6 @@ RUN mkdir -p /data
 
 # Expose environment variables for runtime configuration
 ENV CPL_DEBUG=""
-ENV WINDNINJA_CLI_SRTM_API_KEY=""
-ENV CUSTOM_SRTM_API_KEY=""
 ENV NINJA_FILL_DEM_NO_DATA=OFF
 
 # Default entrypoint: windninja binary
